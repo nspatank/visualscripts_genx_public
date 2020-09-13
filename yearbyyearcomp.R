@@ -9,7 +9,7 @@ library(reshape)
 setwd("/Users/anikamaskara/Desktop/P2X/genx_viz/PJM_results_Sep1")
 all_inputs = read.csv(file="sample_inputs_pjm.csv", header=TRUE, sep=",", stringsAsFactors = FALSE, na.strings="")
 
-#read in capacity csv and inputs, extract relevant settings
+#read in capacity csv and inputs, extract relevant settings from it
 Capacity_1 <- read_csv("capacity.csv")
 
 resource_mapping <- select(all_inputs, Resource, Fuel)
