@@ -1,4 +1,3 @@
-setwd("/Users/anikamaskara/Desktop/P2X/genx_viz/PJM_results_Sep1/2030/p3_2030_deepdecarbonization/Inputs")
 
 load_csv <- read_csv("Load_data.csv") 
 load <- select(load_csv, contains("Load_MW_"))
