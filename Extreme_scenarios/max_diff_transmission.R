@@ -49,7 +49,7 @@ iter_max_cap <- dplyr::select(Network, iter, New_Trans_Capacity, Policy) %>%
   ungroup() %>%
   group_by(Policy) %>%
   slice(which.max(sum)) %>%
-  mutate(condition = "Max Total Cap") %>%
+  mutate(condition = "Max Cap") %>%
   ungroup() %>%
   left_join(dplyr::select(Network, Line, iter, New_Trans_Capacity, Policy)) %>%
   right_join(Network_data)
@@ -61,13 +61,14 @@ iter_min_cap <- dplyr::select(Network, iter, New_Trans_Capacity, Policy) %>%
   ungroup() %>%
   group_by(Policy) %>%
   slice(which.min(sum)) %>%
-  mutate(condition = "Min Total Cap") %>%
+  mutate(condition = "Min Cap") %>%
   ungroup() %>%
   left_join(dplyr::select(Network, Line, iter, New_Trans_Capacity, Policy)) %>%
   right_join(Network_data)
 
 #join both the dataframes with iterations corresponding to max/min capacity of a give resource type
 max_min_iter <- dplyr::bind_rows(iter_max_cap, iter_min_cap)
+write.csv(distinct(max_min_iter,iter, Policy,condition), "../result_data/max_min_trans.csv",row.names = FALSE)
 
 ggplot(max_min_iter, aes(x=Transmission.Path.Name, y=New_Trans_Capacity))+
   geom_bar(position="stack", stat="identity", fill="grey") + 
@@ -102,6 +103,7 @@ iter_min_cap_z <- dplyr::select(Network, iter, Line, New_Trans_Capacity, Policy)
 
 #join both the dataframes with iterations corresponding to max/min capacity of a give resource type for each region
 max_min_iter_z <- dplyr::bind_rows(iter_max_cap_z, iter_min_cap_z)
+write.csv(distinct (max_min_iter_z,iter, Policy, Line_sel,condition), "../result_data/max_min_trans_z.csv",row.names = FALSE)
 
 ggplot(max_min_iter_z, aes(x=factor(Line_sel), y=New_Trans_Capacity, fill=Transmission.Path.Name))+
   geom_bar(position="stack", stat="identity") + 

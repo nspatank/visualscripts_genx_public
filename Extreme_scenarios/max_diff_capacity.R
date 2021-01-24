@@ -47,9 +47,9 @@ Capacity$Resource_Name <- factor(Capacity$Resource_Name,levels = Resource_Name)
 Capacity$Type <- 'NA'
 Capacity$Type[Capacity$Resource_Name=="pumped_hydro"] <- "Storage"
 Capacity$Type[Capacity$Resource_Name=="battery"] <- "Storage"
-Capacity$Type[Capacity$Resource_Name=="solar"] <- "VRE"
-Capacity$Type[Capacity$Resource_Name=="offshore_wind"] <- "VRE"
-Capacity$Type[Capacity$Resource_Name=="onshore_wind"] <- "VRE"
+Capacity$Type[Capacity$Resource_Name=="solar"] <- "solar"
+Capacity$Type[Capacity$Resource_Name=="offshore_wind"] <- "offshore"
+Capacity$Type[Capacity$Resource_Name=="onshore_wind"] <- "onshore"
 Capacity$Type[Capacity$Resource_Name=="hydro"] <- "Clean Firm"
 Capacity$Type[Capacity$Resource_Name=="hydrogen_storage"] <- "LDS"
 Capacity$Type[Capacity$Resource_Name=="other_renewables"] <- "Clean Firm"
@@ -87,6 +87,8 @@ max_min_aggre <- dplyr::select(max_min_iter, iter, Resource_Name, EndCap, Policy
   group_by(iter,Type,Policy, condition, Resource_Name) %>%
   summarise(sum = sum(EndCap))
 
+write.csv(distinct (max_min_aggre,iter), "../result_data/max_min_cap_agg.csv",row.names = FALSE)
+
 ggplot(max_min_aggre, aes(x=Type, y=sum, fill=Resource_Name))+
   geom_bar(position="stack", stat="identity") + 
   theme_bw()+
@@ -120,6 +122,7 @@ iter_min_cap_z <- dplyr::select(Capacity, iter, Type, EndCap, Policy,Region) %>%
 
 #join both the dataframes with iterations corresponding to max/min capacity of a give resource type for each region
 max_min_iter_z <- dplyr::bind_rows(iter_max_cap_z, iter_min_cap_z)
+write.csv(distinct (max_min_iter_z,iter,Type, Policy, Region,condition), "../result_data/max_min_cap_z.csv", row.names = FALSE)
 
 for (z in ZONE_MAP){
   max_min_iter_ <- subset(max_min_iter_z, max_min_iter_z$Region==z)
@@ -133,3 +136,54 @@ for (z in ZONE_MAP){
     scale_fill_manual(name = "Resource",values = as.character(Resource_color_$color_list))+
     ggsave(paste("Max_min_Capacity_",z,".png"), width=10, height=5, dpi=500)
 }
+
+
+#SPECIFICALLY MAX/MIN VRE
+#allocate resource type for each Resource_Name
+Capacity$Type <- 'NA'
+Capacity$Type[Capacity$Resource_Name=="pumped_hydro"] <- "Storage"
+Capacity$Type[Capacity$Resource_Name=="battery"] <- "Storage"
+Capacity$Type[Capacity$Resource_Name=="solar"] <- "VRE"
+Capacity$Type[Capacity$Resource_Name=="offshore_wind"] <- "VRE"
+Capacity$Type[Capacity$Resource_Name=="onshore_wind"] <- "VRE"
+Capacity$Type[Capacity$Resource_Name=="hydro"] <- "Clean Firm"
+Capacity$Type[Capacity$Resource_Name=="hydrogen_storage"] <- "LDS"
+Capacity$Type[Capacity$Resource_Name=="other_renewables"] <- "Clean Firm"
+Capacity$Type[Capacity$Resource_Name=="nuclear"] <- "Clean Firm"
+Capacity$Type[Capacity$Resource_Name=="NGCCS"] <- "Clean Firm"
+Capacity$Type[Capacity$Resource_Name=="ZCF"] <- "ZCF"
+
+#WECC-WIDE MAX/MIN - AGGREGATED PLOT
+#Select iteration with maximum capacity for each Resource type defined above
+iter_max_cap <- dplyr::select(Capacity, iter, Type, EndCap, Policy) %>%
+  group_by(iter,Type,Policy) %>%
+  filter(Type=="VRE") %>%
+  summarise(sum=sum(EndCap)) %>%
+  ungroup() %>%
+  group_by(Type,Policy) %>%
+  slice(which.max(sum)) %>%
+  mutate(condition = "Max Cap") %>%
+  ungroup() %>%
+  left_join(dplyr::select(Capacity, Region, iter, Resource_Name, EndCap, Policy))
+
+#Select iteration with minimum capacity for each Resource type defined above
+iter_min_cap <- dplyr::select(Capacity, iter, Type, EndCap, Policy) %>%
+  group_by(iter,Type,Policy) %>%
+  filter(Type=="VRE") %>%
+  summarise(sum=sum(EndCap)) %>%
+  ungroup() %>%
+  group_by(Type,Policy) %>%
+  slice(which.min(sum)) %>%
+  mutate(condition = "Min Cap") %>%
+  left_join(dplyr::select(Capacity, Region, iter, Resource_Name, EndCap, Policy))
+
+#join both the dataframes with iterations corresponding to max/min capacity of a give resource type
+max_min_iter <- dplyr::bind_rows(iter_max_cap, iter_min_cap)
+
+#aggregate the End Capacity for entire WECC for selected iterations
+max_min_aggre <- dplyr::select(max_min_iter, iter, Resource_Name, EndCap, Policy, condition, Type) %>%
+  group_by(iter,Type,Policy, condition, Resource_Name) %>%
+  summarise(sum = sum(EndCap))
+
+write.csv(distinct (max_min_aggre,iter), "../result_data/max_min_cap_VRE.csv",row.names = FALSE)
+

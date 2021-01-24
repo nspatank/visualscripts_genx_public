@@ -1,0 +1,5 @@
+"iter","Type","Policy","condition"
+"11","VRE","p2_2045_high_mid_REF_high","Max Cap"
+"11","VRE","p7_2045_high_low_REF_high","Max Cap"
+"18","VRE","p2_2045_high_mid_REF_high","Min Cap"
+"35","VRE","p7_2045_high_low_REF_high","Min Cap"

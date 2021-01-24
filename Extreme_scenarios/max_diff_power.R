@@ -87,6 +87,7 @@ max_min_iter_gen <- dplyr::bind_rows(iter_max_gen, iter_min_gen)
 max_min_aggre <- dplyr::select(max_min_iter_gen, iter, Resource_Name, EndPower, Policy, condition, Type) %>%
   group_by(iter,Type,Policy, condition, Resource_Name) %>%
   summarise(sum = sum(EndPower))
+write.csv(distinct (max_min_aggre,iter,Type, Policy, condition), "../result_data/max_min_gen.csv",row.names = FALSE)
 
 #plot aggregated Power
 ggplot(max_min_aggre, aes(x=Type, y=sum, fill=Resource_Name))+
@@ -122,6 +123,8 @@ iter_min_gen_z <- dplyr::select(Power, iter, Type, EndPower, Policy,Region) %>%
 
 #join both the dataframes with iterations corresponding to max/min Power of a give resource type for each region
 max_min_iter_z <- dplyr::bind_rows(iter_max_gen_z, iter_min_gen_z)
+write.csv(distinct (max_min_iter_z,iter,Type, Policy, Region, condition), "../result_data/max_min_gen_z.csv",row.names = FALSE)
+
 #plot selected iteration for each region
 for (z in ZONE_MAP){
   max_min_iter_gen_z <- subset(max_min_iter_z, max_min_iter_z$Region==z)
